@@ -1,8 +1,15 @@
-import 'package:chat/models/auth_form_data.dart';
+import 'dart:io';
+
+import 'package:chat/components/user_image_picker.dart';
+import 'package:chat/core/models/auth_form_data.dart';
 import 'package:flutter/material.dart';
 
 class AuthForm extends StatefulWidget {
-  const AuthForm({super.key});
+  final void Function(AuthFormData) onSubmit;
+  const AuthForm({
+    required this.onSubmit,
+    super.key,
+  });
 
   @override
   State<AuthForm> createState() => _AuthFormState();
@@ -12,9 +19,27 @@ class _AuthFormState extends State<AuthForm> {
   final _formKey = GlobalKey<FormState>();
   final _fromData = AuthFormData();
 
+  void _handleImagePick(File image) {
+    _fromData.image = image;
+  }
+
+  void _showError(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+          content: Text(msg),
+          backgroundColor: Theme.of(context).colorScheme.error),
+    );
+  }
+
   void _submit() {
     final isValid = _formKey.currentState?.validate() ?? false;
     if (!isValid) return;
+
+    if (_fromData.image == null && _fromData.isSignup) {
+      return _showError('Imagem não selecionada!');
+    }
+
+    widget.onSubmit(_fromData);
   }
 
   @override
@@ -28,19 +53,21 @@ class _AuthFormState extends State<AuthForm> {
           child: Column(
             children: [
               if (_fromData.isSignup)
-              TextFormField(
-                key: const ValueKey('name'),
-                initialValue: _fromData.name,
-                onChanged: (name) => _fromData.name = name,
-                decoration: const InputDecoration(labelText: 'Nome'),
-                validator: (_name) {
-                  final name = _name ?? '';
-                  if (name.trim().length < 5) {
-                    return 'Nome deve ter no mínimo 5 caracteres';
-                  }
-                  return null;
-                },
-              ),
+                UserImagePicker(onImagePick: _handleImagePick),
+              if (_fromData.isSignup)
+                TextFormField(
+                  key: const ValueKey('name'),
+                  initialValue: _fromData.name,
+                  onChanged: (name) => _fromData.name = name,
+                  decoration: const InputDecoration(labelText: 'Nome'),
+                  validator: (_name) {
+                    final name = _name ?? '';
+                    if (name.trim().length < 5) {
+                      return 'Nome deve ter no mínimo 5 caracteres';
+                    }
+                    return null;
+                  },
+                ),
               TextFormField(
                 key: const ValueKey('email'),
                 initialValue: _fromData.email,
@@ -62,7 +89,7 @@ class _AuthFormState extends State<AuthForm> {
                 decoration: const InputDecoration(labelText: 'Senha'),
                 validator: (_password) {
                   final password = _password ?? '';
-                  if (!password.contains('@')) {
+                  if (password.trim().length < 5) {
                     return 'Senha deve ter no mínimo 5 caracteres';
                   }
                   return null;
