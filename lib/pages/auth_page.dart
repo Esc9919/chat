@@ -32,9 +32,6 @@ class _AuthPageState extends State<AuthPage> {
     } catch (error) {} finally {
       setState(() => _isLoading = false);
     }
-
-    print('AuthPage...');
-    print(formData.email);
     //setState(() => _isLoading = false);
   }
 
