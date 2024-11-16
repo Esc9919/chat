@@ -9,8 +9,10 @@
 # packages, and plugins designed to encourage good coding practices.
 analyzer:
   errors:
+    collection_methods_unrelated_type: ignore
     constant_identifier_names: ignore
     no_leading_underscores_for_local_identifiers: ignore
+    prefer_final_fields: ignore
 include: package:flutter_lints/flutter.yaml
 
 linter:
